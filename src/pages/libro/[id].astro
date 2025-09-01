@@ -1,0 +1,75 @@
+---
+import { getCollection, render } from "astro:content";
+import { SHOW_BUY_BUTTON } from "astro:env/server";
+//vamos Renderizar el contenido del libro por el render
+import Layout from "../../layouts/Layout.astro";
+import AmazonLogo from "../../components/AmazonLogo.astro";
+import BookScore from "../../components/BookScore.astro";
+import BuyButton from "../../components/BuyButton.astro";
+
+// export async function getStaticPaths() {
+//     return [
+//         {
+//             params: { id: "codigo-limpio" },
+//             props: { title: "Codigo Limpio"}
+//         },
+//         {
+//             params: { id: "libro-negro"},
+//             props: { title: "Libro Negro para Porgramadores"}
+//         }
+//     ]
+// } asi se puede hacer a mano pero seria una forma mas lenta porque se tendria que hacer una por una, asi que mejor se hace asi ->
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+
+  return books.map((book) => ({
+    params: { id: book.slug },
+    props: { book },
+  }));
+}
+
+const { book } = Astro.props;
+const { data, slug } = book;
+const { title, author, img, readtime, descripcion, buy } = data;
+
+const { Content } = await render(book);
+// esto hara para rendererizar el content
+
+export const prerender = true
+
+---
+
+<Layout title={`${title} - Dev Books`}>
+  <div class="flex gap-12">
+    <aside class="flex flex-col items-center gap-4">
+      <a href="/" class="hover:underline opacity-70">← Volver atras</a>
+      <img
+        transition:name={`img-${slug}`}
+        src={`/${img}`}
+        alt={title}
+        class="rounded w-80 h-auto"
+      />
+
+      <BookScore server:defer id={slug}>
+        <span slot="fallback" class="text-xs opacity-70">Cargando Puntuacion...</span>
+        <!-- para que muestre la esperta del renderizado y no solo algo vacio -->
+      </BookScore>
+       <!-- el serve:defer sirve para decirle que sea dinamico. todo sera dinamico exceto. esto es una Isla de servidor ⭐
+      esta parte -->
+      {
+        SHOW_BUY_BUTTON && ( <BuyButton server:defer buy={buy} />
+        //esto es el uso de la variable de entorono. como esta en true si va a mostrar el boton pero si esta en false no.
+         
+        )
+      }
+      <!-- Enlace para comprar -->
+    </aside>
+
+    <main class="max-w-3xl">
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <div class="prose prose-invert">
+        <Content />
+      </div>
+    </main>
+  </div>
+</Layout>

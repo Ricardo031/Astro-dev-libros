@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+html {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: #13151a;
+    /* Elimina color: #fff; */
+}
+
+/* Si quieres que el texto fuera de .prose sea blanco, usa body */
+body {
+    color: #fff;
+}
